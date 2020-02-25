@@ -2,7 +2,8 @@ import pyjadx
 import frida
 import pygments
 import os
-# TODO 20200225 : overload process
+# TODO 2020. 02. 25. JVM Error Handling
+# TODO 2020. 02 .25. dump file path
 
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def hasRootCheck(app): 
@@ -24,12 +25,16 @@ def hasRootCheck(app):
 
     # Extract root checker classes
     for cls in app.classes:
-        target_code_line = cls.code.splitlines()
-        for rootfile in rootFiles:
-            for iter in target_code_line:
-                if rootfile in iter:
-                    AntiRootList.add(cls.fullname)
-                    break              
+        if ('google' in cls.fullname) or ('android' in cls.fullname): # optimization
+            continue
+        else:
+            cls.save('../dump-code/' + cls.fullname) # code dump
+            target_code_line = cls.code.splitlines()
+            for rootfile in rootFiles:
+                for iter in target_code_line:
+                    if rootfile in iter:
+                        AntiRootList.add(cls.fullname)
+                        break
 
     os.system('clear')
     print("Done.")
@@ -48,12 +53,10 @@ def MakeBypassScript(app):
         for i in AntiRootList: # Classes
             for j in app.get_class(i).methods: # Methods
                 if (str(j.return_type) == 'boolean'): # if Methods return type is bool
-                    print(len(j.arguments))
                     jscode += 'try {\n'
                     jscode += f'    Java.use("{i}").{j.name}.implementation = function()'
                     jscode += ' {    return false;   }\n'
-                    jscode += '} catch(e) {    console.error(e);   }\n\n'    
-            
+                    jscode += '} catch(e) {    console.error(e);   }\n\n' # fix overload issue
         return jscode
 
     # No Root Checker
