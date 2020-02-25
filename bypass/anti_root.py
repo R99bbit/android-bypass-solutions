@@ -2,8 +2,14 @@ import pyjadx
 import frida
 import pygments
 import os
+import sys
+sys.path.append("../algorithm/");
+from Stack import *
+
+# idea -> using frida -> trace method & specify root checker
 # TODO 2020. 02. 25. JVM Error Handling
 # TODO 2020. 02 .25. dump file path
+# issue jscode Exception Handler
 
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def hasRootCheck(app): 
@@ -22,13 +28,13 @@ def hasRootCheck(app):
             '/system/bin/failsafe/su', '/data/local/su',
             '/su/bin/su', 'busybox'
         ]
-
+    
     # Extract root checker classes
     for cls in app.classes:
-        if ('google' in cls.fullname) or ('android' in cls.fullname): # optimization
+        if ('google' in cls.fullname) or ('android' in cls.fullname) or ('kakao' in cls.fullname) or ('facebook' in cls.fullname): # optimization
             continue
         else:
-            cls.save('../dump-code/' + cls.fullname) # code dump
+            cls.save('../dump-code/' + cls.fullname + '.java') # code dump
             target_code_line = cls.code.splitlines()
             for rootfile in rootFiles:
                 for iter in target_code_line:
@@ -36,9 +42,6 @@ def hasRootCheck(app):
                         AntiRootList.add(cls.fullname)
                         break
 
-    os.system('clear')
-    print("Done.")
-    
     return AntiRootList
 
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
@@ -52,7 +55,7 @@ def MakeBypassScript(app):
         jscode += 'console.log("[*] Bypass Anti-Root Start...");\n'
         for i in AntiRootList: # Classes
             for j in app.get_class(i).methods: # Methods
-                if (str(j.return_type) == 'boolean'): # if Methods return type is bool
+                if (str(j.return_type) == 'boolean'): # if Methods return type is bool and equal root check method
                     jscode += 'try {\n'
                     jscode += f'    Java.use("{i}").{j.name}.implementation = function()'
                     jscode += ' {    return false;   }\n'
