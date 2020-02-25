@@ -6,6 +6,7 @@ import pygments
 import pathlib
 import os
 
+# commit test
 # apk binding
 jadx = pyjadx.Jadx()
 app_path = pathlib.Path("./sample-apk/panelpower.apk").resolve().absolute()
