@@ -3,6 +3,7 @@ import frida
 import pygments
 import os
 # TODO 20200225 : overload process
+
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def hasRootCheck(app): 
     AntiRootList = set()
@@ -46,10 +47,12 @@ def MakeBypassScript(app):
         jscode += 'console.log("[*] Bypass Anti-Root Start...");\n'
         for i in AntiRootList: # Classes
             for j in app.get_class(i).methods: # Methods
-                if (str(j.return_type) == 'boolean') and (len(j.arguments) < 2): # if Methods return type is bool
+                if (str(j.return_type) == 'boolean'): # if Methods return type is bool
                     print(len(j.arguments))
-                    jscode += f'Java.use("{i}").{j.name}.implementation = function()'
-                    jscode += ' {    return false;   }\n'    
+                    jscode += 'try {\n'
+                    jscode += f'    Java.use("{i}").{j.name}.implementation = function()'
+                    jscode += ' {    return false;   }\n'
+                    jscode += '} catch(e) {    console.error(e);   }\n\n'    
             
         return jscode
 
