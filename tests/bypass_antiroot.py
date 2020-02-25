@@ -1,5 +1,3 @@
-from RootBypass import *
-
 import pyjadx
 import frida
 import pygments
@@ -7,9 +5,15 @@ import os
 import sys
 import pathlib
 
+sys.path.append("../bypass/");
+from anti_root import *
+
+# adb connect 127.0.0.1:62001
+# adb shell "/data/local/tmp/frida-server &"
+
 # pyjadx
 jadx = pyjadx.Jadx()
-app_path = pathlib.Path("panelpower.apk").resolve().absolute()
+app_path = pathlib.Path("../sample-apk/panelpower.apk").resolve().absolute()
 app = jadx.load(app_path.as_posix())
 
 jscode = 'Java.perform(function() {\n' + MakeBypassScript(app) + '});\n'
