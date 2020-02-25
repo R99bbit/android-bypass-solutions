@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import pyjadx
 import frida
 import pygments
@@ -11,7 +12,7 @@ from anti_root import *
 # adb connect 127.0.0.1:62001
 # adb shell "/data/local/tmp/frida-server &"
 
-# pyjadx
+# pyjadx generate bypassing script
 jadx = pyjadx.Jadx()
 app_path = pathlib.Path("../sample-apk/panelpower.apk").resolve().absolute()
 app = jadx.load(app_path.as_posix())
