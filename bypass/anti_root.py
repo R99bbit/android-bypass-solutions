@@ -2,14 +2,8 @@ import pyjadx
 import frida
 import pygments
 import os
-import sys
-sys.path.append("../algorithm/");
-from Stack import *
 
-# idea -> using frida -> trace method & specify root checker
 # TODO 2020. 02. 25. JVM Error Handling
-# TODO 2020. 02 .25. dump file path
-# issue jscode Exception Handler
 
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def hasRootCheck(app): 
@@ -28,13 +22,22 @@ def hasRootCheck(app):
             '/system/bin/failsafe/su', '/data/local/su',
             '/su/bin/su', 'busybox'
         ]
+
+    if app.classes: # Can code dumping?
+        dump_path = input("class founded, where I save it? : android-auto-hack/dump-code/")
+        dump_path = '../dump-code/' + dump_path
+        try:
+            if not os.path.isdir(dump_path):
+                os.mkdir(dump_path)
+        except Exception as e:
+            print(e)
     
     # Extract root checker classes
     for cls in app.classes:
         if ('google' in cls.fullname) or ('android' in cls.fullname) or ('kakao' in cls.fullname) or ('facebook' in cls.fullname): # optimization
             continue
         else:
-            cls.save('../dump-code/' + cls.fullname + '.java') # code dump
+            cls.save('../dump-code/' + dump_path + '/' + cls.fullname + '.java') # code dump -> generate cahce
             target_code_line = cls.code.splitlines()
             for rootfile in rootFiles:
                 for iter in target_code_line:
@@ -60,7 +63,7 @@ def MakeBypassScript(app):
                     jscode += f'    Java.use("{i}").{j.name}.implementation = function()'
                     jscode += ' {    try {   return false;   } catch(e) {    return this.' + j.name + '();   }   }\n'
                     jscode += '} catch(e) {    console.error(e);   }\n\n' # fix overload issue
-        return jscode
+        return jscode # java.lang.ClassNotFoundException
     # No Root Checker
     else:
         print("[*] Anti-Root no exist")

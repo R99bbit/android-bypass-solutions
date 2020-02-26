@@ -14,14 +14,14 @@ from anti_root import *
 
 # pyjadx generate bypassing script
 jadx = pyjadx.Jadx()
-app_path = pathlib.Path("../sample-apk/panelpower.apk").resolve().absolute()
+app_path = pathlib.Path("../sample-apk/Fint.apk").resolve().absolute()
 app = jadx.load(app_path.as_posix())
 
 jscode = 'Java.perform(function() {\n' + MakeBypassScript(app) + '});\n'
 print(jscode)
 
 # frida binding
-TargetPackage = "com.embrain.panelpower";
+TargetPackage = "com.dco.fint";
 def on_message(message, data):
     print("{} -> {}".format(message, data))
 
