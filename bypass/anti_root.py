@@ -4,7 +4,8 @@ import pygments
 import os
 
 # TODO 2020. 02. 25. JVM Error Handling
-
+# TODO 2020. 02. 26. Package Name Auto Detection
+# TODO 2020. 02. 26. Java Object Memory Address Checking
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def hasRootCheck(app): 
     AntiRootList = set()
@@ -20,7 +21,7 @@ def hasRootCheck(app):
             '/system/xbin/.ext', '/data/local/xbin/su',
             '/data/local/bin/su', '/system/sd/xbin/su',
             '/system/bin/failsafe/su', '/data/local/su',
-            '/su/bin/su', 'busybox'
+            '/su/bin/su', 'busybox', 'Emulator'
         ]
 
     if app.classes: # Can code dumping?
@@ -34,7 +35,7 @@ def hasRootCheck(app):
     
     # Extract root checker classes
     for cls in app.classes:
-        if ('google' in cls.fullname) or ('android' in cls.fullname) or ('kakao' in cls.fullname) or ('facebook' in cls.fullname): # optimization
+        if ('google' in cls.fullname) or ('android' in cls.fullname) or ('kakao' in cls.fullname) or ('facebook' in cls.fullname) or ('naver' in cls.fullname): # optimization
             continue
         else:
             cls.save('../dump-code/' + dump_path + '/' + cls.fullname + '.java') # code dump -> generate cahce
