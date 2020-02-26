@@ -26,7 +26,7 @@ def hasRootCheck(app):
 
     if app.classes: # Can code dumping?
         dump_path = input("class founded, where I save it? : android-auto-hack/dump-code/")
-        dump_path = '../dump-code/' + dump_path
+        dump_path = './dump-code/' + dump_path
         try:
             if not os.path.isdir(dump_path):
                 os.mkdir(dump_path)
@@ -38,7 +38,7 @@ def hasRootCheck(app):
         if ('google' in cls.fullname) or ('android' in cls.fullname) or ('kakao' in cls.fullname) or ('facebook' in cls.fullname) or ('naver' in cls.fullname): # optimization
             continue
         else:
-            cls.save('../dump-code/' + dump_path + '/' + cls.fullname + '.java') # code dump -> generate cahce
+            cls.save(dump_path + '/' + cls.fullname + '.java') # code dump -> generate cahce
             target_code_line = cls.code.splitlines()
             for rootfile in rootFiles:
                 for iter in target_code_line:

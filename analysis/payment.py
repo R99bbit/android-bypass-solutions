@@ -4,9 +4,10 @@ import pygments
 import os
 
 def LoadDumpList():
+    dump_code = {} # {key = className : value = code}
+
     dump_path = input("Target Path : android-auto-hack/dump-code/")
     dump_path = '../dump-code/' + dump_path
-    dump_code = {} # {key = className : value = code}
     try:
         print('[*] loading dump code')
         # loading dump code
@@ -24,6 +25,8 @@ def LoadDumpList():
     return dump_code
 
 def PaymentDetection():
+    payment_class = []
+    
     wordlist = open('payment_wordlist').read().split()
     dump_code = LoadDumpList()
 
@@ -32,8 +35,9 @@ def PaymentDetection():
         for iter_wordlist in wordlist:
             if iter_wordlist in dump_code[iter_key]:
                 print(iter_key)
-                
-    return wordlist
+                payment_class.append(iter_key)
+    
+    return payment_class
 
 if __name__ == "__main__":
     print(PaymentDetection())
