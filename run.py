@@ -11,12 +11,15 @@ from analysis.payment import *
 
 
 def a_bypass_antiroot(jscode):
-    jscode += MakeBypassScript(app)
-    os.system('clear')
-    print("hooking script : ")
-    print(jscode + "});\n")
-    return jscode
-
+    try:
+        jscode += MakeBypassScript(app)
+        os.system('clear')
+        print("hooking script : ")
+        print(jscode + "});\n")
+        return jscode
+    except Exception as e:
+        print(e)
+        
 # start application
 # @param String $package package name
 # @param String $jscode hooking script

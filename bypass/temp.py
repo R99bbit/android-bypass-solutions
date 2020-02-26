@@ -34,7 +34,7 @@ from Stack import *
                     AntiRootMethod.append(MethodList[MethodIndex - 1])
                     RootCheckerFlag = False
                     
-
+                                                                   
             # deal open & closing
             for iter in targetLine:
                 if iter is '{':
@@ -44,7 +44,7 @@ from Stack import *
 
             for rootfile in rootFiles:
                 if rootfile in targetLine:
-                    test.append(1)
+                    rootFile.append(MethodList[MethodIndex])
                     RootCheckerFlag = True
             
             # Check Method End
