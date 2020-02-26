@@ -58,10 +58,9 @@ def MakeBypassScript(app):
                 if (str(j.return_type) == 'boolean'): # if Methods return type is bool and equal root check method
                     jscode += 'try {\n'
                     jscode += f'    Java.use("{i}").{j.name}.implementation = function()'
-                    jscode += ' {    return false;   }\n'
+                    jscode += ' {    try {   return false;   } catch(e) {    return this.' + j.name + '();   }   }\n'
                     jscode += '} catch(e) {    console.error(e);   }\n\n' # fix overload issue
         return jscode
-
     # No Root Checker
     else:
         print("[*] Anti-Root no exist")
