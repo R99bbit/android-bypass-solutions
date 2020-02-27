@@ -21,7 +21,7 @@ def a_bypass_antiroot(jscode):
         print(e)
 
 def b_search_hooking_point(app):
-    os.system('clear')
+    # os.system('clear')
     payment_class = PaymentDetection()
     getter_class = FindingGetter(app, payment_class)
     print('[*] payment class list')

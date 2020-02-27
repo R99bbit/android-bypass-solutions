@@ -12,6 +12,7 @@ this function will detect `root check routine` on your APK and dump it
 
 
 ## [b] search hooking point
+
 finding payment class and getter(this function being developed..)
 
 ## [c] binding

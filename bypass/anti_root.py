@@ -2,10 +2,11 @@ import pyjadx
 import frida
 import pygments
 import os
+import sys
 
-# TODO 2020. 02. 25. JVM Error Handling
 # TODO 2020. 02. 26. Package Name Auto Detection
 # TODO 2020. 02. 26. Java Object Memory Address Checking
+
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def hasRootCheck(app): 
     AntiRootList = set()
@@ -21,7 +22,7 @@ def hasRootCheck(app):
             '/system/xbin/.ext', '/data/local/xbin/su',
             '/data/local/bin/su', '/system/sd/xbin/su',
             '/system/bin/failsafe/su', '/data/local/su',
-            '/su/bin/su', 'busybox', 'Emulator'
+            '/su/bin/su', 'busybox', 'Emulator', '"su"'
         ]
 
     if app.classes: # Can code dumping?
@@ -45,13 +46,68 @@ def hasRootCheck(app):
                     if rootfile in iter:
                         AntiRootList.add(cls.fullname)
                         break
-
     return AntiRootList
+
+def ParseMethod(app, AntiRootList):
+    rootFiles = [
+        '/sbin/su', '/system/su',
+        '/system/bin/su', '/system/sbin/su',
+        '/system/xbin/su', '/system/xbin/mu',
+        '/system/bin/.ext/.su', '/system/usr/su-backup',
+        '/data/data/com.noshufou.android.su', '/system/app/Superuser.apk',
+        '/system/app/su.apk', '/system/bin/.ext',
+        '/system/xbin/.ext', '/data/local/xbin/su',
+        '/data/local/bin/su', '/system/sd/xbin/su',
+        '/system/bin/failsafe/su', '/data/local/su',
+        '/su/bin/su', 'busybox', 'Emulator', '"su"'
+    ]
+    AntiRootList = AntiRootList
+    AntiRootMethod = dict() # cls_name : methodlist
+
+    # target list init
+    for cls in AntiRootList:
+        AntiRootMethod[cls] = list()
+        cls_obj = app.get_class(cls)
+        splitCode = cls_obj.code.splitlines()
+        MethodList = list()
+
+        for method in cls_obj.methods:
+            tmp = list()
+            tmp.append(method.decompiled_line)
+            tmp.append(method.name)
+            MethodList.append(tmp)
+
+        MethodList = sorted(MethodList)
+
+        # Method parsing and anti-root detection
+        for i in range(len(MethodList)):
+            currentMethod = MethodList[i][1]
+
+            # Assign method's start-end point
+            indexStart = MethodList[i][0]
+            if i < len(MethodList) - 1:
+                indexEnd = MethodList[i + 1][0]
+            else:
+                indexEnd = len(splitCode)
+
+            # Method code parsing
+            parsedMethod = ""
+            for j in range(indexStart, indexEnd):
+                parsedMethod += splitCode[j]
+            
+            # Root checker detection
+            for rootfile in rootFiles:
+                if rootfile in parsedMethod:
+                    AntiRootMethod[cls].append(currentMethod)
+                    rootFiles.append(currentMethod) # if root checker using chained routine
+                    break
+    return AntiRootMethod
 
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def MakeBypassScript(app):
     jscode = ""
     AntiRootList = hasRootCheck(app)
+    AntiRootMethod = ParseMethod(app, AntiRootList)
     
     # Anti-Root Detected
     if AntiRootList:
@@ -59,7 +115,7 @@ def MakeBypassScript(app):
         jscode += 'console.log("[*] Bypass Anti-Root Start...");\n'
         for i in AntiRootList: # Classes
             for j in app.get_class(i).methods: # Methods
-                if (str(j.return_type) == 'boolean'): # if Methods return type is bool and equal root check method
+                if (str(j.return_type) == 'boolean') and (j.name in AntiRootMethod[i]): # Is root checker?
                     jscode += 'try {\n'
                     jscode += f'    Java.use("{i}").{j.name}.implementation = function()'
                     jscode += ' {    try {   return false;   } catch(e) {    return this.' + j.name + '();   }   }\n'
