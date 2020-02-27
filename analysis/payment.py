@@ -7,7 +7,7 @@ def LoadDumpList():
     dump_code = {} # {key = className : value = code}
 
     dump_path = input("Target Path : android-auto-hack/dump-code/")
-    dump_path = '../dump-code/' + dump_path
+    dump_path = './dump-code/' + dump_path
     try:
         print('[*] loading dump code')
         # loading dump code
@@ -27,17 +27,27 @@ def LoadDumpList():
 def PaymentDetection():
     payment_class = []
     
-    wordlist = open('payment_wordlist').read().split()
+    wordlist = open('analysis/payment_wordlist').read().split()
     dump_code = LoadDumpList()
 
     print('[*] Start Detection...')
     for iter_key in dump_code.keys():
         for iter_wordlist in wordlist:
             if iter_wordlist in dump_code[iter_key]:
-                print(iter_key)
                 payment_class.append(iter_key)
     
     return payment_class
 
 if __name__ == "__main__":
     print(PaymentDetection())
+
+def FindingGetter(app, classlist):
+    wordlist = open('analysis/payment_wordlist').read().split()
+    getter_class = []
+    for clazz in classlist:
+        for word in wordlist:
+            getter = 'get' + word
+            if getter in app.get_class(clazz).code:
+                getter_class.append(clazz)
+
+    return getter_class

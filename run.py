@@ -19,11 +19,23 @@ def a_bypass_antiroot(jscode):
         return jscode
     except Exception as e:
         print(e)
-        
+
+def b_search_hooking_point(app):
+    os.system('clear')
+    payment_class = PaymentDetection()
+    getter_class = FindingGetter(app, payment_class)
+    print('[*] payment class list')
+    for i in payment_class:
+        print(i)
+
+    print('\n[*] getter list')
+    for j in getter_class:
+        print(j)
+
 # start application
 # @param String $package package name
 # @param String $jscode hooking script
-def b_binding(package, jscode):
+def c_binding(package, jscode):
     jscode += '\n});'
     def on_message(message, data):
         print("{} -> {}".format(message, data))
@@ -64,7 +76,8 @@ while True:
     print('\n========== ' + args.p + ' Attached!! ==========')
     print('[s] show hooking script')
     print('[a] bypass anti-root(generate script)')
-    print('[b] binding')
+    print('[b] search hooking point')
+    print('[c] binding')
     cmd = input("\nandroid-auto-hack> ")
 
     if cmd is 's':
@@ -73,9 +86,12 @@ while True:
 
     elif cmd is 'a':
         jscode = a_bypass_antiroot(jscode)
-
+    
     elif cmd is 'b':
-        b_binding(args.p, jscode)
+        b_search_hooking_point(app)
+
+    elif cmd is 'c':
+        c_binding(args.p, jscode)
         break
     
     elif cmd is 'clear' or 'cls':
