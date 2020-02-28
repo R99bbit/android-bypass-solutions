@@ -4,9 +4,9 @@ import pygments
 import os
 import sys
 
-# TODO 2020. 02. 26. Package Name Auto Detection
 # TODO 2020. 02. 26. Java Object Memory Address Checking
 # TODO 2020. 02. 27. Crwaling APK files
+
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def hasRootCheck(app): 
     AntiRootList = set()
@@ -26,20 +26,23 @@ def hasRootCheck(app):
         ]
 
     if app.classes: # Can code dumping?
-        dump_path = input("class founded, where I save it? : android-auto-hack/dump-code/")
-        dump_path = './dump-code/' + dump_path
-        try:
-            if not os.path.isdir(dump_path):
-                os.mkdir(dump_path)
-        except Exception as e:
-            print(e)
+        cmd = input('class founded, dump it?(yes/no) : ')
+        if (cmd is 'yes') or (cmd is 'y'):
+            dump_path = input("where I save it? : android-auto-hack/dump-code/")
+            dump_path = './dump-code/' + dump_path
+            try:
+                if not os.path.isdir(dump_path):
+                    os.mkdir(dump_path)
+            except Exception as e:
+                print(e)    
     
     # Extract root checker classes
     for cls in app.classes:
         if ('google' in cls.fullname) or ('android' in cls.fullname) or ('kakao' in cls.fullname) or ('facebook' in cls.fullname) or ('naver' in cls.fullname): # optimization
             continue
         else:
-            cls.save(dump_path + '/' + cls.fullname + '.java') # code dump -> generate cahce
+            if (cmd is 'yes') or (cmd is 'y'):
+                cls.save(dump_path + '/' + cls.fullname + '.java') # code dump -> generate cahce
             target_code_line = cls.code.splitlines()
             for rootfile in rootFiles:
                 for iter in target_code_line:
@@ -48,6 +51,8 @@ def hasRootCheck(app):
                         break
     return AntiRootList
 
+# @param pyjadx.Jadx $app Decompiled APK or Dex Object
+# @param list $AntiRootList hasRootCheck($app)
 def ParseMethod(app, AntiRootList):
     rootFiles = [
         '/sbin/su', '/system/su',

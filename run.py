@@ -21,7 +21,7 @@ def a_bypass_antiroot(jscode):
         return jscode
     except Exception as e:
         print(e)
-
+# @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def b_search_hooking_point(app):
     # os.system('clear')
     payment_class = PaymentDetection()
