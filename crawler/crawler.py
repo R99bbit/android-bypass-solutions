@@ -71,7 +71,7 @@ def run():
         html = get_html(target_url)
         soup = BeautifulSoup(html, 'lxml')
         print("====== " + i + " ======")
-        for j in soup.find('a', id='download_link'):
+        for j in soup.find_all('a', id='download_link'):
             print(j)
             if 'download.apkpure.com' in j.attrs['href']:
                 request_target.append(j.attrs['href'])
