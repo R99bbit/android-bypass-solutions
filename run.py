@@ -5,6 +5,8 @@ import pathlib
 import argparse
 import sys
 import os
+import subprocess
+import re
 
 from bypass.anti_root import *
 from analysis.payment import *
@@ -57,11 +59,16 @@ def c_binding(package, jscode):
 
 # argument parsing
 parser = argparse.ArgumentParser(description='usage test')
-
-parser.add_argument('-p', required=True, help='package name')
 parser.add_argument('-f', required=True, help='apk file path')
 
+# extract package name using regular expression
 args = parser.parse_args()
+
+res = subprocess.check_output(['aapt', 'dump', 'badging', args.f])
+res = str(res)
+
+m = re.search("name='(.*?)'", res)
+package_name = m.group(1)
 
 # jadx binding
 jadx = pyjadx.Jadx()
@@ -73,7 +80,7 @@ app = jadx.load(app_path.as_posix())
 jscode = 'Java.perform(function() {\n'
 
 while True:
-    print('\n========== ' + args.p + ' Attached!! ==========')
+    print('\n========== ' + package_name + ' Attached!! ==========')
     print('[s] show hooking script')
     print('[a] bypass anti-root(generate script)')
     print('[b] search hooking point')
@@ -91,7 +98,7 @@ while True:
         b_search_hooking_point(app)
 
     elif cmd is 'c':
-        c_binding(args.p, jscode)
+        c_binding(package_name, jscode)
         break
     
     elif cmd is 'clear' or 'cls':

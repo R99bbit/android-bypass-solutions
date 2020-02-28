@@ -6,7 +6,7 @@ import sys
 
 # TODO 2020. 02. 26. Package Name Auto Detection
 # TODO 2020. 02. 26. Java Object Memory Address Checking
-
+# TODO 2020. 02. 27. Crwaling APK files
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def hasRootCheck(app): 
     AntiRootList = set()
