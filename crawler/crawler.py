@@ -10,17 +10,20 @@ def get_html(url):
    return _html
 
 def get_package_name():
+    search_qry = ['apps/category/FINANCE', 'search?q=은행&c=apps',
+    'search?q=뱅크&c=apps', 'search?q=금융&c=apps', 'search?q=결제&c=apps']
+    
     print("[*] get package name..")
     pkg_list = list()
+    for i in range(len(search_qry)):
+        target_url = "https://play.google.com/store/" + search_qry[i]
+        html = get_html(target_url)
+        soup = BeautifulSoup(html, 'lxml')
 
-    target_url = "https://play.google.com/store/apps/category/FINANCE"
-    html = get_html(target_url)
-    soup = BeautifulSoup(html, 'lxml')
-
-    for item in soup.find_all("a"):
-        if ('href' in item.attrs) and ('/store/apps/details?id' in item.attrs['href']):
-            target = item.attrs['href']
-            pkg_list.append(target[23:])
+        for item in soup.find_all("a"):
+            if ('href' in item.attrs) and ('/store/apps/details?id' in item.attrs['href']):
+                target = item.attrs['href']
+                pkg_list.append(target[23:])
 
     pkg_list = list(set(pkg_list))
     print("[*] " + str(len(pkg_list)) + " package founded!")
@@ -70,7 +73,7 @@ def run():
         target_url = i
         html = get_html(target_url)
         soup = BeautifulSoup(html, 'lxml')
-        print("====== " + i + " ======")
+        print("[*] " + i)
         for j in soup.find_all('a', id='download_link'):
             print(j)
             if 'download.apkpure.com' in j.attrs['href']:
