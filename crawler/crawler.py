@@ -11,8 +11,9 @@ def get_html(url):
 
 def get_package_name():
     search_qry = ['apps/category/FINANCE', 'search?q=은행&c=apps',
-    'search?q=뱅크&c=apps', 'search?q=금융&c=apps', 'search?q=결제&c=apps']
-    
+    'search?q=뱅크&c=apps', 'search?q=금융&c=apps', 'search?q=결제&c=apps',
+    'search?q=핀테크&c=apps', 'search?q=투자&c=apps', 'search?q=블록체인&c=apps']
+
     print("[*] get package name..")
     pkg_list = list()
     for i in range(len(search_qry)):
@@ -82,6 +83,7 @@ def run():
 
     for i in range(len(pkg_list)):
         if download_apk(pkg_list[i], request_target[i]):
+
             print(f'[{i+1}/{len(pkg_list)}] {pkg_list[i]} download.. SUCCESS')
         else:
             print(f'[{i+1}/{len(pkg_list)}] {pkg_list[i]} download.. FAIL')
