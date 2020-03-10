@@ -19,7 +19,6 @@ class JNI_Object:
                     ext = os.path.splitext(full_filename)[-1]
 
                     if ext == '.so': 
-                        print(full_filename)
                         so_arch = full_filename.split('/')[-2]
                         so_name = full_filename.split('/')[-1]
                         shutil.copy(full_filename, f'../jni/{so_arch}/')

@@ -10,7 +10,7 @@ from unpacking import *
 def Native_Detection(filepath):
     # Unpacking APK
     unzip(filepath) # Unpacking Target APK -> filepath_
-    print('[*] APK unpacked path -> ' + filepath + '_')
+    print('[*] APK unpacked path -> ' + filepath + '_/')
     
     # JNI Detection
     instance = JNI_Object()
@@ -21,19 +21,85 @@ def Native_Detection(filepath):
         return
 
     else:
-        print('[*] shared object detected -> ' + str(len(instance.Native_List)))
-        hasRootCheck(instance.Native_List)
+        cmd = None
+        print('[*] shared object detected -> ' + str(len(instance.Native_List)) + ' cases')
+        for i in range(len(instance.Native_List)):
+            print(f'[{i+1}] {instance.Native_List[i]}')
+
+        print('\n[*] Choose Your Architecture')
+        print('[a] arm64-v8a')
+        print('[b] armeabi-v7a')
+        print('[c] x86_64')
+        print('[d] x86')
+
+        cmd = input('android-auto-hack> ')
+        while not('a' <= cmd and cmd <= 'd'):
+            cmd = input('android-auto-hack> ')
+        
+        hasRootCheck(instance.Native_List, cmd)
+
 
 # @param List $NativeList Native Libc List
-def hasRootCheck(NativeList):
+def hasRootCheck(NativeList, cmd):
+
+    rootFiles = [
+            '/sbin/su', '/system/su',
+            '/system/bin/su', '/system/sbin/su',
+            '/system/xbin/su', '/system/xbin/mu',
+            '/system/bin/.ext/.su', '/system/usr/su-backup',
+            '/data/data/com.noshufou.android.su', '/system/app/Superuser.apk',
+            '/system/app/su.apk', '/system/bin/.ext',
+            '/system/xbin/.ext', '/data/local/xbin/su',
+            '/data/local/bin/su', '/system/sd/xbin/su',
+            '/system/bin/failsafe/su', '/data/local/su',
+            '/su/bin/su', 'busybox', 'Emulator', '"su"'
+        ]
+    
+    # ready to analysis
+    arch = None
+    TargetLibc = list()
+    if cmd is 'a':
+        arch = 'arm64-v8a'   
+    elif cmd is 'b':
+        arch = 'armeabi-v7a'
+    elif cmd is 'c':
+        arch = 'x86_64'
+    elif cmd is 'd':
+        arch = 'x86'
+
+    for iter in NativeList:
+        TargetLibc.append(f'../jni/{arch}/' + iter.split('/')[-1])
+    
+    TargetLibc = list(set(TargetLibc))
+
+    print(TargetLibc)
+
     # Extract Inner String
-    for file in NativeList:
-        print(file)
-        for string in extract_strings(file):
-            print(string)
+    for iter in TargetLibc: # Target Native Libc Iteration
+        tmp = list()
+        print('\n==========> ' + str(iter.split('/')[-1]))
+        
+        for string in extract_strings(iter):
+            tmp.append(string)
+
+        for file in rootFiles:
+            if file in tmp:
+                print(file)
+
 
     # TODO if target file has rooting-strings -> bypass
-    
+    '''
+        어떻게? -> 후킹 포인트로 잡은 메서드의 리턴을 정반대로 설정(Interceptor)
+        ex) fopen(arg1, arg2)라면 이를 replace하여 return !fopen(arg1, arg2)
+        
+        [간략한 예시 코드]
+        Interceptor.attach(Module.findExportByName("libbpsec.so", "fopen"), {
+            onLeave: function(retVal) {
+                return !retVal;
+            }
+        });
+    '''
+
 def Native_Make_AntiRootBypass():
     pass
 
