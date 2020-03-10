@@ -29,11 +29,12 @@ def Native_Detection(filepath):
         print('\n[*] Choose Your Architecture')
         print('[a] arm64-v8a')
         print('[b] armeabi-v7a')
-        print('[c] x86_64')
-        print('[d] x86')
+        print('[c] armeabi')
+        print('[d] x86_64')
+        print('[3] x86')
 
         cmd = input('android-auto-hack> ')
-        while not('a' <= cmd and cmd <= 'd'):
+        while not('a' <= cmd and cmd <= 'e'):
             cmd = input('android-auto-hack> ')
         
         hasRootCheck(instance.Native_List, cmd)
@@ -63,8 +64,10 @@ def hasRootCheck(NativeList, cmd):
     elif cmd is 'b':
         arch = 'armeabi-v7a'
     elif cmd is 'c':
-        arch = 'x86_64'
+        arch = 'armeabi'
     elif cmd is 'd':
+        arch = 'x86_64'
+    elif cmd is 'e':
         arch = 'x86'
 
     for iter in NativeList:
@@ -79,12 +82,15 @@ def hasRootCheck(NativeList, cmd):
         tmp = list()
         print('\n==========> ' + str(iter.split('/')[-1]))
         
-        for string in extract_strings(iter):
-            tmp.append(string)
+        try:
+            for string in extract_strings(iter):
+                tmp.append(string)
 
-        for file in rootFiles:
-            if file in tmp:
-                print(file)
+            for file in rootFiles:
+                if file in tmp:
+                    print(file)
+        except Exception as e:
+            pass
 
 
     # TODO if target file has rooting-strings -> bypass
@@ -95,9 +101,13 @@ def hasRootCheck(NativeList, cmd):
         [간략한 예시 코드]
         Interceptor.attach(Module.findExportByName("libbpsec.so", "fopen"), {
             onLeave: function(retVal) {
-                return !retVal;
+                return 0;
             }
         });
+
+        fopen -> NULL 포인터
+        access -> -1
+
     '''
 
 def Native_Make_AntiRootBypass():
@@ -105,4 +115,4 @@ def Native_Make_AntiRootBypass():
 
 
 if __name__ == '__main__':
-    Native_Detection('../sample-apk/com.bpsec.andvulnapp.apk')
+    Native_Detection('../sample-apk/toss.apk')

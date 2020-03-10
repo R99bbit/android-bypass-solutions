@@ -1,8 +1,11 @@
 import zipfile
 
 def unzip(apkpath):
-    unzip_target = zipfile.ZipFile(apkpath)
-    unzip_target.extractall(apkpath + "_")
+    try:
+        unzip_target = zipfile.ZipFile(apkpath)
+        unzip_target.extractall(apkpath + "_")
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":
