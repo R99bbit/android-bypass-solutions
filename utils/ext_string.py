@@ -14,5 +14,4 @@ def extract_strings(filename, min=4):
             yield result
 
 if __name__ == "__main__":
-    for i in extract_strings('../jni/x86/libbpsec.so'):
-        print(i)
+    print(extract_strings('../jni/x86/libbpsec.so'))

@@ -8,13 +8,13 @@ import os
 import subprocess
 import re
 
-from bypass.java_anti_root import *
+from bypass.dex_anti_root import *
 from analysis.payment import *
 
 
 def a_bypass_antiroot(jscode):
     try:
-        jscode += MakeBypassScript(app)
+        jscode += Dex_Make_AntiRootBypass(app)
         os.system('clear')
         print("hooking script : ")
         print(jscode + "});\n")

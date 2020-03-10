@@ -109,7 +109,7 @@ def ParseMethod(app, AntiRootList):
     return AntiRootMethod
 
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
-def MakeBypassScript(app):
+def Dex_Make_AntiRootBypass(app):
     jscode = ""
     AntiRootList = hasRootCheck(app)
     AntiRootMethod = ParseMethod(app, AntiRootList)
