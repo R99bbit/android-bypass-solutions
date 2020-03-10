@@ -8,7 +8,7 @@ import os
 import subprocess
 import re
 
-from bypass.anti_root import *
+from bypass.java_anti_root import *
 from analysis.payment import *
 
 
