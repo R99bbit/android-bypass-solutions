@@ -21,8 +21,8 @@ class JNI_Object:
                     if ext == '.so': 
                         so_arch = full_filename.split('/')[-2]
                         so_name = full_filename.split('/')[-1]
-                        shutil.copy(full_filename, f'../jni/{so_arch}/')
-                        self.Native_List.append(f'../jni/{so_arch}/{so_name}')
+                        shutil.copy(full_filename, f'./jni/{so_arch}/')
+                        self.Native_List.append(f'./jni/{so_arch}/{so_name}')
         
         except Exception as e:
             print(e)

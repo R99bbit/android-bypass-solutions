@@ -8,11 +8,12 @@ import os
 import subprocess
 import re
 
+from bypass.native_anti_root import *
 from bypass.dex_anti_root import *
 from analysis.payment import *
 
 
-def a_bypass_antiroot(jscode):
+def a_dex_bypass_antiroot(jscode):
     try:
         jscode += Dex_Make_AntiRootBypass(app)
         os.system('clear')
@@ -21,19 +22,17 @@ def a_bypass_antiroot(jscode):
         return jscode
     except Exception as e:
         print(e)
-# @param pyjadx.Jadx $app Decompiled APK or Dex Object
-def b_search_hooking_point(app):
-    # os.system('clear')
-    payment_class = PaymentDetection()
-    getter_class = FindingGetter(app, payment_class)
-    print('[*] payment class list')
-    for i in payment_class:
-        print(i)
 
-    print('\n[*] getter list')
-    for j in getter_class:
-        print(j)
-
+def b_native_bypass_antiroot(path, jscode):
+    try:
+        jscode += Native_Make_AntiRootBypass(path)
+        os.system('clear')
+        print("hooking script : ")
+        print(jscode + "});\n")
+        return jscode
+    except Exception as e:
+        print(e)
+    
 # start application
 # @param String $package package name
 # @param String $jscode hooking script
@@ -82,8 +81,8 @@ jscode = 'Java.perform(function() {\n'
 while True:
     print('\n========== ' + package_name + ' Attached!! ==========')
     print('[s] show hooking script')
-    print('[a] bypass anti-root(generate script)')
-    print('[b] search hooking point')
+    print('[a] dex bypass anti-root')
+    print('[b] native bypass anti-root')
     print('[c] binding')
     cmd = input("\nandroid-auto-hack> ")
 
@@ -92,10 +91,10 @@ while True:
         print(jscode)
 
     elif cmd is 'a':
-        jscode = a_bypass_antiroot(jscode)
+        jscode = a_dex_bypass_antiroot(jscode)
     
     elif cmd is 'b':
-        b_search_hooking_point(app)
+        jscode = b_native_bypass_antiroot(args.f, jscode)
 
     elif cmd is 'c':
         c_binding(package_name, jscode)

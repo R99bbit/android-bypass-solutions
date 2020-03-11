@@ -1,10 +1,9 @@
 import sys
 
-sys.path.append('../utils/')
 
-from ext_string import *
-from jni_detection import *
-from unpacking import *
+from utils.ext_string import *
+from utils.jni_detection import *
+from utils.unpacking import *
 
 # @param String $filepath Target APK Path
 def Native_Detection(filepath):
@@ -37,7 +36,7 @@ def Native_Detection(filepath):
         while not('a' <= cmd and cmd <= 'e'):
             cmd = input('android-auto-hack> ')
         
-        hasRootCheck(instance.Native_List, cmd)
+    return instance.Native_List, cmd
 
 
 # @param List $NativeList Native Libc List
@@ -71,7 +70,7 @@ def hasRootCheck(NativeList, cmd):
         arch = 'x86'
 
     for iter in NativeList:
-        TargetLibc.append(f'../jni/{arch}/' + iter.split('/')[-1])
+        TargetLibc.append(f'./jni/{arch}/' + iter.split('/')[-1])
     
     TargetLibc = list(set(TargetLibc))
 
@@ -95,12 +94,14 @@ def hasRootCheck(NativeList, cmd):
 
     RootingLibc = list(set(RootingLibc))
 
-    print(RootingLibc)
-    Native_Make_AntiRootBypass(RootingLibc)
+    return RootingLibc
 
 
 # List $RootingLibc Anti Root Library List
-def Native_Make_AntiRootBypass(RootingLibc):
+def Native_Make_AntiRootBypass(filepath):
+    NativeList, cmd = Native_Detection(filepath)
+    RootingLibc = hasRootCheck(NativeList, cmd)
+    
     '''
         어떻게? -> 후킹 포인트로 잡은 메서드의 리턴을 정반대로 설정(Interceptor)
         ex) fopen(arg1, arg2)라면 이를 replace하여 return !fopen(arg1, arg2)
@@ -116,7 +117,7 @@ def Native_Make_AntiRootBypass(RootingLibc):
         access -> -1
 
     '''
-    
+
     jscode = ''
     native_func_ret = {'fopen':'null', 'access':'-1'}
     for libc in RootingLibc:
@@ -125,8 +126,7 @@ def Native_Make_AntiRootBypass(RootingLibc):
             jscode += '     onLeave:  function(retVal) {    '+ f'return {native_func_ret[func]};' + '   }\n'
             jscode += '});\n'
 
-    print(jscode)
     return jscode
 
 if __name__ == '__main__':
-    Native_Detection('../sample-apk/com.bpsec.andvulnapp.apk')
+    print(Native_Make_AntiRootBypass('../sample-apk/com.bpsec.andvulnapp.apk'))
