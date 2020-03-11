@@ -119,13 +119,21 @@ def Native_Make_AntiRootBypass(filepath):
     '''
 
     jscode = ''
-    native_func_ret = {'fopen':'null', 'access':'-1'}
+    native_func_ret = {'fopen':'ptr("0x0")', 'access':'-1'}
     for libc in RootingLibc:
         for func in native_func_ret:
-            jscode += f'\nInterceptor.attach(Module.findExportByName("{libc}", "{func}"),' + ' {\n'
-            jscode += '     onLeave:  function(retVal) {    '+ f'return {native_func_ret[func]};' + '   }\n'
-            jscode += '});\n'
-
+            jscode += f'\n    Interceptor.attach(Module.findExportByName("{libc}", "{func}"),' + ' {\n'
+            jscode += '         onEnter: function(args) {   console.log("Enter");   },\n'
+            jscode += '         onLeave: function(retval) {    ' + f'retval.replace({native_func_ret[func]}); ' + f'console.log("{func} : " + retval);' + '   }\n'
+            jscode += '    });\n'
+            # jscode += f'\nInterceptor.attach(Module.findExportByName("{libc}", "{func}"),' + ' {\n'
+            # jscode += '     onLeave:  function(retval) {    ' + f'console.log("{func} : " + retval);' + '   }\n'
+            # jscode += '});\n'
+            # Java_com_bpsec_libbpsec_RootChecker_isRooting
+            jscode += f'\n    Interceptor.attach(Module.findExportByName("{libc}", "Java_com_bpsec_libbpsec_RootChecker_isRooting"),' + ' {\n'
+            jscode += '         onEnter: function(args) {   console.log("Enter");   },\n'
+            jscode += '         onLeave: function(retval) {    ' + f'retval.replace(ptr("0"));'  + '   }\n'
+            jscode += '    });\n'
     return jscode
 
 if __name__ == '__main__':
