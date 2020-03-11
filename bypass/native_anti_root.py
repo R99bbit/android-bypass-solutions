@@ -31,7 +31,7 @@ def Native_Detection(filepath):
         print('[b] armeabi-v7a')
         print('[c] armeabi')
         print('[d] x86_64')
-        print('[3] x86')
+        print('[e] x86')
 
         cmd = input('android-auto-hack> ')
         while not('a' <= cmd and cmd <= 'e'):
@@ -42,7 +42,7 @@ def Native_Detection(filepath):
 
 # @param List $NativeList Native Libc List
 def hasRootCheck(NativeList, cmd):
-
+    RootingLibc = list() # Anti Rooting Loginc Exist List
     rootFiles = [
             '/sbin/su', '/system/su',
             '/system/bin/su', '/system/sbin/su',
@@ -89,11 +89,18 @@ def hasRootCheck(NativeList, cmd):
             for file in rootFiles:
                 if file in tmp:
                     print(file)
+                    RootingLibc.append(iter.split('/')[-1])
         except Exception as e:
             pass
 
+    RootingLibc = list(set(RootingLibc))
 
-    # TODO if target file has rooting-strings -> bypass
+    print(RootingLibc)
+    Native_Make_AntiRootBypass(RootingLibc)
+
+
+# List $RootingLibc Anti Root Library List
+def Native_Make_AntiRootBypass(RootingLibc):
     '''
         어떻게? -> 후킹 포인트로 잡은 메서드의 리턴을 정반대로 설정(Interceptor)
         ex) fopen(arg1, arg2)라면 이를 replace하여 return !fopen(arg1, arg2)
@@ -109,10 +116,17 @@ def hasRootCheck(NativeList, cmd):
         access -> -1
 
     '''
+    
+    jscode = ''
+    native_func_ret = {'fopen':'null', 'access':'-1'}
+    for libc in RootingLibc:
+        for func in native_func_ret:
+            jscode += f'\nInterceptor.attach(Module.findExportByName("{libc}", "{func}"),' + ' {\n'
+            jscode += '     onLeave:  function(retVal) {    '+ f'return {native_func_ret[func]};' + '   }\n'
+            jscode += '});\n'
 
-def Native_Make_AntiRootBypass():
-    pass
-
+    print(jscode)
+    return jscode
 
 if __name__ == '__main__':
-    Native_Detection('../sample-apk/toss.apk')
+    Native_Detection('../sample-apk/com.bpsec.andvulnapp.apk')
