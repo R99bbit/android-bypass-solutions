@@ -101,39 +101,16 @@ def hasRootCheck(NativeList, cmd):
 def Native_Make_AntiRootBypass(filepath):
     NativeList, cmd = Native_Detection(filepath)
     RootingLibc = hasRootCheck(NativeList, cmd)
-    
-    '''
-        어떻게? -> 후킹 포인트로 잡은 메서드의 리턴을 정반대로 설정(Interceptor)
-        ex) fopen(arg1, arg2)라면 이를 replace하여 return !fopen(arg1, arg2)
-        
-        [간략한 예시 코드]
-        Interceptor.attach(Module.findExportByName("libbpsec.so", "fopen"), {
-            onLeave: function(retVal) {
-                return 0;
-            }
-        });
-
-        fopen -> NULL 포인터
-        access -> -1
-
-    '''
 
     jscode = ''
     native_func_ret = {'fopen':'ptr("0x0")', 'access':'-1'}
     for libc in RootingLibc:
         for func in native_func_ret:
             jscode += f'\n    Interceptor.attach(Module.findExportByName("{libc}", "{func}"),' + ' {\n'
-            jscode += '         onEnter: function(args) {   console.log("Enter");   },\n'
-            jscode += '         onLeave: function(retval) {    ' + f'retval.replace({native_func_ret[func]}); ' + f'console.log("{func} : " + retval);' + '   }\n'
+            jscode += '         onEnter: function(args) {   console.log("[*] ' + func + '() Called");   },\n'
+            jscode += '         onLeave: function(retval) {    ' + f'retval.replace({native_func_ret[func]}); ' + f'console.log("[*] {func} returns " + retval);' + '   }\n'
             jscode += '    });\n'
-            # jscode += f'\nInterceptor.attach(Module.findExportByName("{libc}", "{func}"),' + ' {\n'
-            # jscode += '     onLeave:  function(retval) {    ' + f'console.log("{func} : " + retval);' + '   }\n'
-            # jscode += '});\n'
-            # Java_com_bpsec_libbpsec_RootChecker_isRooting
-            jscode += f'\n    Interceptor.attach(Module.findExportByName("{libc}", "Java_com_bpsec_libbpsec_RootChecker_isRooting"),' + ' {\n'
-            jscode += '         onEnter: function(args) {   console.log("Enter");   },\n'
-            jscode += '         onLeave: function(retval) {    ' + f'retval.replace(ptr("0"));'  + '   }\n'
-            jscode += '    });\n'
+
     return jscode
 
 if __name__ == '__main__':
