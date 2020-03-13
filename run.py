@@ -11,7 +11,7 @@ import re
 from bypass.native_anti_root import *
 from bypass.dex_anti_root import *
 from analysis.payment import *
-
+from utils.crawler import *
 
 def a_dex_bypass_antiroot(jscode):
     try:
@@ -64,45 +64,60 @@ parser = argparse.ArgumentParser(description='usage test')
 parser.add_argument('-f', required=True, help='apk file path')
 
 # extract package name using regular expression
+cmd = ''
 args = parser.parse_args()
 
-res = subprocess.check_output(['aapt', 'dump', 'badging', args.f])
-res = str(res)
+print('\n[+] Choose Analysis Type')
+print('[a] Single APK')
+print('[b] Multiple APKs')
 
-m = re.search("name='(.*?)'", res)
-package_name = m.group(1)
+cmd = input('android-auto-hack> ')
 
-# jadx binding
-jadx = pyjadx.Jadx()
-app_path = pathlib.Path(args.f).resolve().absolute()
-app = jadx.load(app_path.as_posix())
+while (cmd is not 'a') and (cmd is not 'b'):
+    cmd = input('android-auto-hack> ')
+
+if cmd is 'a':
+    ''' Type [a] Single APK '''
+    res = subprocess.check_output(['aapt', 'dump', 'badging', args.f])
+    res = str(res)
+
+    m = re.search("name='(.*?)'", res)
+    package_name = m.group(1)
+
+    # jadx binding
+    jadx = pyjadx.Jadx()
+    app_path = pathlib.Path(args.f).resolve().absolute()
+    app = jadx.load(app_path.as_posix())
 
 
-# generate frida hooking script
-jscode = 'Java.perform(function() {\n'
+    # generate frida hooking script
+    jscode = 'Java.perform(function() {\n'
 
-while True:
-    print('\n========== ' + package_name + ' Attached!! ==========')
-    print('[s] show hooking script')
-    print('[a] dex bypass anti-root')
-    print('[b] native bypass anti-root')
-    print('[c] binding')
-    cmd = input("\nandroid-auto-hack> ")
+    while True:
+        print('\n========== ' + package_name + ' Attached!! ==========')
+        print('[s] show hooking script')
+        print('[a] dex bypass anti-root')
+        print('[b] native bypass anti-root')
+        print('[c] binding')
+        cmd = input("\nandroid-auto-hack> ")
 
-    if cmd is 's':
-        print('\nhooking script : ')
-        print(jscode)
+        if cmd is 's':
+            print('\nhooking script : ')
+            print(jscode)
 
-    elif cmd is 'a':
-        jscode = a_dex_bypass_antiroot(jscode)
-    
-    elif cmd is 'b':
-        jscode = b_native_bypass_antiroot(args.f, jscode)
+        elif cmd is 'a':
+            jscode = a_dex_bypass_antiroot(jscode)
+        
+        elif cmd is 'b':
+            jscode = b_native_bypass_antiroot(args.f, jscode)
 
-    elif cmd is 'c':
-        c_binding(package_name, jscode)
-        break
-    
-    elif cmd is 'clear' or 'cls':
-        os.system('clear')
-    
+        elif cmd is 'c':
+            c_binding(package_name, jscode)
+            break
+        
+        elif cmd is 'clear' or 'cls':
+            os.system('clear')
+
+elif cmd is 'b':
+    ''' Type [b] Multiple APKs '''
+    run()

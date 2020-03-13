@@ -14,7 +14,7 @@ def get_package_name():
     'search?q=뱅크&c=apps', 'search?q=금융&c=apps', 'search?q=결제&c=apps',
     'search?q=핀테크&c=apps', 'search?q=투자&c=apps', 'search?q=블록체인&c=apps']
 
-    print("[*] get package name..")
+    print("[+] crawler init - get package name..")
     pkg_list = list()
     for i in range(len(search_qry)):
         target_url = "https://play.google.com/store/" + search_qry[i]
@@ -31,7 +31,7 @@ def get_package_name():
     return pkg_list
 
 def get_dowload_url(pkg_list=get_package_name()):
-    print("[*] generate download url..")
+    print("[+] generate download url..")
     new_pkg_list = list()
     url_list = list()
     for item in pkg_list:
@@ -55,8 +55,12 @@ def download_apk(package_name, download_url):
     try:
         r = requests.get(download_url, timeout=60)
         # save => <package name>.apk
-        with open('../sample-apk/' + file_name, 'wb') as apk:
-            apk.write(r.content)
+        if __name__ == "__main__":
+            with open('../sample-apk/' + file_name, 'wb') as apk:
+                apk.write(r.content)
+        else:
+            with open('./sample-apk/' + file_name, 'wb') as apk:
+                apk.write(r.content)
     except requests.exceptions.Timeout as e:
         print('time out')
         return False
@@ -74,7 +78,7 @@ def run():
         target_url = i
         html = get_html(target_url)
         soup = BeautifulSoup(html, 'lxml')
-        print("[*] " + i)
+        print(i)
         for j in soup.find_all('a', id='download_link'):
             print(j)
             if 'download.apkpure.com' in j.attrs['href']:
