@@ -68,6 +68,7 @@ def ParseMethod(app, AntiRootList):
     ]
     AntiRootList = AntiRootList
     AntiRootMethod = dict() # cls_name : methodlist
+    test_string = list()
 
     # target list init
     for cls in AntiRootList:
@@ -105,16 +106,15 @@ def ParseMethod(app, AntiRootList):
                 if rootfile in parsedMethod:
                     AntiRootMethod[cls].append(currentMethod)
                     rootFiles.append(currentMethod) # if root checker using chained routine
+                    test_string.append(splitCode[indexEnd - 1])
                     break
-    return AntiRootMethod
+    return AntiRootMethod, test_string
 
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def Dex_Make_AntiRootBypass(app):
     jscode = ""
     AntiRootList = hasRootCheck(app)
-    AntiRootMethod = ParseMethod(app, AntiRootList)
-
-    print(AntiRootMethod)
+    AntiRootMethod, test_string = ParseMethod(app, AntiRootList)
 
     # Anti-Root Detected
     if AntiRootList:
@@ -141,10 +141,13 @@ def Dex_Make_AntiRootBypass(app):
                     jscode += '} catch(e) {    console.error(e);   }\n\n' # fix overload issue
                 elif (str(j.return_type) == 'java.lang.String') and (j.name in AntiRootMethod[i]):
                     jscode += f'Java.use("{i}").{j.name}.' + overload + 'implementation = function()'
-                    jscode += ' {\n     console.log("[Name] ' + j.name + ' [Return Type] ' + str(j.return_type) + '"); \n}\n // '
+                    jscode += ' {\n     console.log("[Name] ' + j.name + ' [Return Type] ' + str(j.return_type) + '"); \n}\n'
                 
-                if len(j.arguments) > 0:
-                    jscode += str(j.arguments[0].is_array)
+                # if len(j.arguments) > 0:
+                #     jscode += str(j.arguments[0].is_array)
+        
+        for i in range(len(test_string)):
+            print(test_string[i])
 
         return jscode # java.lang.ClassNotFoundException
     # No Root Checker

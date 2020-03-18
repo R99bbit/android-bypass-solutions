@@ -18,7 +18,7 @@ def a_dex_bypass_antiroot(jscode):
         tmp = Dex_Make_AntiRootBypass(app)
         if tmp is not None:
             jscode += tmp
-        os.system('clear')
+        # os.system('clear')
         print("hooking script : ")
         print(jscode + "});\n")
         return jscode
