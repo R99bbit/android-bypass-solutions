@@ -15,10 +15,9 @@ from utils.crawler import *
 
 def a_dex_bypass_antiroot(jscode):
     try:
-        
         tmp = Dex_Make_AntiRootBypass(app)
         if tmp is not None:
-            jscode = tmp
+            jscode += tmp
         os.system('clear')
         print("hooking script : ")
         print(jscode + "});\n")

@@ -113,20 +113,47 @@ def Dex_Make_AntiRootBypass(app):
     jscode = ""
     AntiRootList = hasRootCheck(app)
     AntiRootMethod = ParseMethod(app, AntiRootList)
-    
+
+    print(AntiRootMethod)
+
     # Anti-Root Detected
     if AntiRootList:
         jscode += '/* Rooting Bypass */\n'
         jscode += 'console.log("[*] Bypass Anti-Root Start...");\n'
         for i in AntiRootList: # Classes
             for j in app.get_class(i).methods: # Methods
+                overload = ''
+                # if len(j.arguments) == 0:
+                #     overload += 'overload().'
+                # if len(j.arguments) == 1:
+                #     overload += 'overload(arg1).'
+                # if len(j.arguments) == 2:
+                #     overload += 'overload(arg1, arg2).'
+                # if len(j.arguments) == 3:
+                #     overload += 'overload(arg1, arg2, arg3).'
+                # if len(j.arguments) == 4:
+                #     overload += 'overload(arg1, arg2, arg3, arg4).'
+
                 if (str(j.return_type) == 'boolean') and (j.name in AntiRootMethod[i]): # Is root checker?
                     jscode += 'try {\n'
-                    jscode += f'    Java.use("{i}").{j.name}.implementation = function()'
+                    jscode += f'Java.use("{i}").{j.name}.' + overload + 'implementation = function()'
                     jscode += ' {    try {   return false;   } catch(e) {    return this.' + j.name + '();   }   }\n'
                     jscode += '} catch(e) {    console.error(e);   }\n\n' # fix overload issue
+                elif (str(j.return_type) == 'java.lang.String') and (j.name in AntiRootMethod[i]):
+                    jscode += f'Java.use("{i}").{j.name}.' + overload + 'implementation = function()'
+                    jscode += ' {\n     console.log("[Name] ' + j.name + ' [Return Type] ' + str(j.return_type) + '"); \n}\n // '
+                
+                if len(j.arguments) > 0:
+                    jscode += str(j.arguments[0].is_array)
+
         return jscode # java.lang.ClassNotFoundException
     # No Root Checker
     else:
         print("[*] Anti-Root no exist")
         return None
+    
+if __name__ == "__main__":
+    jadx = pyjadx.Jadx()
+    app = jadx.load('../sample-apk/hanabank.apk')
+
+    print(Dex_Make_AntiRootBypass(app))

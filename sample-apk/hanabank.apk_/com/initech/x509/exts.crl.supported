@@ -1,0 +1,16 @@
+#
+# supported Extensions
+# 
+# OID=classname
+#
+
+classBase=com.initech.x509.extensions
+
+2.5.29.18=IssuerAltName
+2.5.29.20=CRLNumber
+2.5.29.21=CRLReason
+2.5.29.24=InvalidityDate
+2.5.29.27=DeltaCRLIndicator
+2.5.29.28=IssuingDistPoint
+2.5.29.35=AuthorityKeyIdentifier
+2.5.29.46=FreshestCRL
