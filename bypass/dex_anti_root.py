@@ -3,6 +3,7 @@ import frida
 import pygments
 import os
 import sys
+import re
 
 # TODO 2020. 02. 26. Java Object Memory Address Checking
 # TODO 2020. 02. 27. Crwaling APK files
@@ -38,7 +39,7 @@ def hasRootCheck(app):
     
     # Extract root checker classes
     for cls in app.classes:
-        if ('google' in cls.fullname) or ('android' in cls.fullname) or ('kakao' in cls.fullname) or ('facebook' in cls.fullname) or ('naver' in cls.fullname): # optimization
+        if ('google' in cls.fullname) or ('android' in cls.fullname) or ('kakao' in cls.fullname) or ('facebook' in cls.fullname) or ('naver' in cls.fullname) or ('okio' in cls.fullname): # optimization
             continue
         else:
             if (cmd is 'yes') or (cmd is 'y'):
@@ -68,7 +69,7 @@ def ParseMethod(app, AntiRootList):
     ]
     AntiRootList = AntiRootList
     AntiRootMethod = dict() # cls_name : methodlist
-    test_string = list()
+    argstype_dict = dict() # method_name : args type
 
     # target list init
     for cls in AntiRootList:
@@ -106,49 +107,60 @@ def ParseMethod(app, AntiRootList):
                 if rootfile in parsedMethod:
                     AntiRootMethod[cls].append(currentMethod)
                     rootFiles.append(currentMethod) # if root checker using chained routine
-                    test_string.append(splitCode[indexEnd - 1])
+                    
+                    # arguments parsing(regular expression)
+                    argstype_dict[currentMethod] = list()
+                    arguments = re.findall('\(([^)]+)', splitCode[indexStart-1])
+                    args_type = list()
+                    if len(arguments) is not 0:
+                        arguments = arguments[0].replace(',', '').split(' ')
+                        for i in range(len(arguments)):
+                            if i % 2 == 0:
+                                argstype_dict[currentMethod].append(arguments[i])
                     break
-    return AntiRootMethod, test_string
+
+    return AntiRootMethod, argstype_dict
 
 # @param pyjadx.Jadx $app Decompiled APK or Dex Object
 def Dex_Make_AntiRootBypass(app):
     jscode = ""
     AntiRootList = hasRootCheck(app)
-    AntiRootMethod, test_string = ParseMethod(app, AntiRootList)
+    AntiRootMethod, argstype_dict = ParseMethod(app, AntiRootList)
 
+
+    print('==========')
+    # refactor
+    for method in argstype_dict:
+        for argtype in range(len(argstype_dict[method])):
+            print(argstype_dict[method][argtype])
+            if argstype_dict[method][argtype] == 'String':
+                argstype_dict[method][argtype] = 'java.lang.String'
+            
+            elif argstype_dict[method][argtype] == 'String[]':
+                argstype_dict[method][argtype] = '[Ljava.lang.String'
+
+            elif argstype_dict[method][argtype] == 'Context':
+                argstype_dict[method][argtype] = 'android.content.Context'
+            
     # Anti-Root Detected
     if AntiRootList:
         jscode += '/* Rooting Bypass */\n'
         jscode += 'console.log("[*] Bypass Anti-Root Start...");\n'
         for i in AntiRootList: # Classes
             for j in app.get_class(i).methods: # Methods
-                overload = ''
-                # if len(j.arguments) == 0:
-                #     overload += 'overload().'
-                # if len(j.arguments) == 1:
-                #     overload += 'overload(arg1).'
-                # if len(j.arguments) == 2:
-                #     overload += 'overload(arg1, arg2).'
-                # if len(j.arguments) == 3:
-                #     overload += 'overload(arg1, arg2, arg3).'
-                # if len(j.arguments) == 4:
-                #     overload += 'overload(arg1, arg2, arg3, arg4).'
-
                 if (str(j.return_type) == 'boolean') and (j.name in AntiRootMethod[i]): # Is root checker?
                     jscode += 'try {\n'
-                    jscode += f'Java.use("{i}").{j.name}.' + overload + 'implementation = function()'
+                    jscode += f'Java.use("{i}").{j.name}.implementation = function()'
                     jscode += ' {    try {   return false;   } catch(e) {    return this.' + j.name + '();   }   }\n'
                     jscode += '} catch(e) {    console.error(e);   }\n\n' # fix overload issue
                 elif (str(j.return_type) == 'java.lang.String') and (j.name in AntiRootMethod[i]):
-                    jscode += f'Java.use("{i}").{j.name}.' + overload + 'implementation = function()'
+                    jscode += f'Java.use("{i}").{j.name}.implementation = function()'
                     jscode += ' {\n     console.log("[Name] ' + j.name + ' [Return Type] ' + str(j.return_type) + '"); \n}\n'
                 
-                # if len(j.arguments) > 0:
-                #     jscode += str(j.arguments[0].is_array)
         
-        for i in range(len(test_string)):
-            print(test_string[i])
-
+        print('==========')
+        print(argstype_dict)
+            
         return jscode # java.lang.ClassNotFoundException
     # No Root Checker
     else:
