@@ -127,39 +127,44 @@ def Dex_Make_AntiRootBypass(app):
     AntiRootList = hasRootCheck(app)
     AntiRootMethod, argstype_dict = ParseMethod(app, AntiRootList)
 
-
-    print('==========')
-    # refactor
-    for method in argstype_dict:
-        for argtype in range(len(argstype_dict[method])):
-            print(argstype_dict[method][argtype])
-            if argstype_dict[method][argtype] == 'String':
-                argstype_dict[method][argtype] = 'java.lang.String'
-            
-            elif argstype_dict[method][argtype] == 'String[]':
-                argstype_dict[method][argtype] = '[Ljava.lang.String'
-
-            elif argstype_dict[method][argtype] == 'Context':
-                argstype_dict[method][argtype] = 'android.content.Context'
             
     # Anti-Root Detected
     if AntiRootList:
+        # refactor
+        for method in argstype_dict:
+            for argtype in range(len(argstype_dict[method])):
+                if argstype_dict[method][argtype] == 'String':
+                    argstype_dict[method][argtype] = 'java.lang.String'
+                
+                elif argstype_dict[method][argtype] == 'String[]':
+                    argstype_dict[method][argtype] = '[Ljava.lang.String;'
+
+                elif argstype_dict[method][argtype] == 'Context':
+                    argstype_dict[method][argtype] = 'android.content.Context'
+            
+        overload = ''
         jscode += '/* Rooting Bypass */\n'
         jscode += 'console.log("[*] Bypass Anti-Root Start...");\n'
         for i in AntiRootList: # Classes
             for j in app.get_class(i).methods: # Methods
-                if (str(j.return_type) == 'boolean') and (j.name in AntiRootMethod[i]): # Is root checker?
-                    jscode += 'try {\n'
-                    jscode += f'Java.use("{i}").{j.name}.implementation = function()'
-                    jscode += ' {    try {   return false;   } catch(e) {    return this.' + j.name + '();   }   }\n'
-                    jscode += '} catch(e) {    console.error(e);   }\n\n' # fix overload issue
-                elif (str(j.return_type) == 'java.lang.String') and (j.name in AntiRootMethod[i]):
-                    jscode += f'Java.use("{i}").{j.name}.implementation = function()'
-                    jscode += ' {\n     console.log("[Name] ' + j.name + ' [Return Type] ' + str(j.return_type) + '"); \n}\n'
-                
-        
-        print('==========')
-        print(argstype_dict)
+                if j.name in AntiRootMethod[i]:
+                    overload = '.overload('
+                    
+                    for argtype in range(len(argstype_dict[j.name])):
+                        overload += f'"{argstype_dict[j.name][argtype]}"'
+                        if argtype != (len(argstype_dict[j.name]) - 1):
+                            overload += ', '
+                    
+                    overload += ')'
+
+                    if str(j.return_type) == 'boolean':
+                        jscode += 'try {\n'
+                        jscode += f'Java.use("{i}").{j.name}' + overload + '.implementation = function()'
+                        jscode += ' {    try {   return false;   } catch(e) {    return this.' + j.name + '();   }   }\n'
+                        jscode += '} catch(e) {    console.error(e);   }\n\n' # fix overload issue              
+                    elif str(j.return_type) == 'java.lang.String':
+                        jscode += f'Java.use("{i}").{j.name}' + overload + '.implementation = function()'
+                        jscode += ' {\n     console.log("[Name] ' + j.name + ' [Return Type] ' + str(j.return_type) + '"); return "n"; \n}\n'
             
         return jscode # java.lang.ClassNotFoundException
     # No Root Checker
