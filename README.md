@@ -1,4 +1,4 @@
-# ANDROID-AUTO-HACK
+# ANDROID-BYPASS-SOLUTIONS
 
 **android vulnerability detection tool**
 
