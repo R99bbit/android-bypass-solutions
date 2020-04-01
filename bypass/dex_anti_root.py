@@ -162,10 +162,19 @@ def Dex_Make_AntiRootBypass(app):
                         jscode += f'Java.use("{i}").{j.name}' + overload + '.implementation = function()'
                         jscode += ' {    try {   return false;   } catch(e) {    return this.' + j.name + '();   }   }\n'
                         jscode += '} catch(e) {    console.error(e);   }\n\n' # fix overload issue              
+                    
                     elif str(j.return_type) == 'java.lang.String':
                         jscode += f'Java.use("{i}").{j.name}' + overload + '.implementation = function()'
-                        jscode += ' {\n     console.log("[Name] ' + j.name + ' [Return Type] ' + str(j.return_type) + '"); return "n"; \n}\n'
-            
+                        jscode += ' {\n     console.log("[Name] ' + j.name + ' [Return Type] ' + str(j.return_type) + '"); // cannot bypass\n}\n'
+                    
+                    elif str(j.return_type) == 'int':
+                        jscode += f'Java.use("{i}").{j.name}' + overload + '.implementation = function()'
+                        jscode += ' {\n     console.log("[Name] ' + j.name + ' [Return Type] ' + str(j.return_type) + '"); // cannot bypass\n}\n'
+                    
+                    elif str(j.return_type) == 'android.content.Context':
+                        jscode += f'Java.use("{i}").{j.name}' + overload + '.implementation = function()'
+                        jscode += ' {\n     console.log("[Name] ' + j.name + ' [Return Type] ' + str(j.return_type) + '"); // cannot bypass\n}\n'
+        
         return jscode # java.lang.ClassNotFoundException
     # No Root Checker
     else:
