@@ -12,7 +12,7 @@ lazy-object-proxy==1.4.3
 lxml==4.5.2
 mccabe==0.6.1
 prompt-toolkit==3.0.7
-Pygments==2.7.1
+Pygments==2.7.4
 pyjadx==0.2.0
 pylint==2.6.0
 requests==2.24.0
