@@ -9,7 +9,7 @@ frida-tools==8.1.3
 idna==2.10
 isort==5.5.2
 lazy-object-proxy==1.4.3
-lxml==4.5.2
+lxml==4.6.3
 mccabe==0.6.1
 prompt-toolkit==3.0.7
 Pygments==2.7.1
